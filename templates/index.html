@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ترجمه کامنت‌های اینستاگرام</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #833ab4;
+        }
+        .input-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .comment-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .username {
+            font-weight: bold;
+            color: #833ab4;
+            margin-bottom: 5px;
+        }
+        .original {
+            color: #666;
+            font-size: 13px;
+            direction: ltr;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .translated {
+            color: #333;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            color: #833ab4;
+            display: none;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📷 ترجمه کامنت‌های اینستاگرام</h1>
+        <div class="input-box">
+            <input type="text" id="urlInput" placeholder="لینک پست اینستاگرام رو اینجا بذار">
+            <button onclick="fetchComments()">ترجمه</button>
+        </div>
+        <div class="loading" id="loading">⏳ در حال دریافت و ترجمه کامنت‌ها...</div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function fetchComments() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) return alert('لینک پست رو وارد کن');
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                const res = await fetch('/translate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                const comments = await res.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (comments.length === 0) {
+                    document.getElementById('results').innerHTML = '<p style="text-align:center">کامنتی پیدا نشد</p>';
+                    return;
+                }
+                
+                comments.forEach(c => {
+                    document.getElementById('results').innerHTML += `
+                        <div class="comment-card">
+                            <div class="username">👤 ${c.username}</div>
+                            <div class="original">${c.original}</div>
+                            <div class="translated">🇮🇷 ${c.translated}</div>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                document.getElementById('loading').style.display = 'none';
+                alert('خطا در دریافت کامنت‌ها');
+            }
+        }
+    </script>
+</body>
+</html>
